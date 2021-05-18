@@ -21,3 +21,21 @@ export const assert1 = [
   'sussex spaniel',
   'welsh spaniel',
 ]
+
+export const input2 = {
+  balance: 5,
+  credits: [4, 5, 6],
+  debits: [1, 2, 3],
+  active: true,
+}
+
+export const assert2 = [
+  '5 balance',
+  '4 credits',
+  '5 credits',
+  '6 credits',
+  '1 debits',
+  '2 debits',
+  '3 debits',
+  'true active',
+]
