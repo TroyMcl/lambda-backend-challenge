@@ -11,15 +11,15 @@ describe('fetching api data for dog breeds', () => {
   beforeEach(() => {
     mockedFetch.mockReturnValueOnce({
       json: () => {
-        return mockPayload
+        return { status: 'success', message: mockPayload }
       },
     })
   })
 
-  it('should return the correct payload and status from a sucessful fetch request', async () => {
+  it('should return the correct payload from a sucessful fetch request', async () => {
     const response = await getDogBreeds()
-    expect(response.status).toEqual('success')
-    expect(response.data).toMatchObject(input1)
+    expect(response.status).toBe('success')
+    expect(response.message).toMatchObject(input1)
   })
 })
 
@@ -32,10 +32,15 @@ describe('handling errors from the external call', () => {
     })
   })
 
-  it('should handle the error and bubble up the correct data to its invoking function', async () => {
-    const response = await getDogBreeds()
-    expect(response.status).toEqual('error')
-    expect(response.data).toEqual('I broke somewhere')
+  it('should bubble up an error from the external API call', async () => {
+    let response
+    try {
+      response = await getDogBreeds()
+    } catch (err) {
+      response = err
+    }
+    expect(response instanceof Error).toBe(true)
+    expect(response.message).toEqual('I broke somewhere')
   })
 })
 
@@ -53,8 +58,14 @@ describe('it handles the external API timing out', () => {
   })
 
   it('should return the correct status and message for a timed out API call', async () => {
-    const response = await getDogBreeds()
-    expect(response.status).toEqual('error')
-    expect(response.data).toBe('Request to externial API timed out')
+    let response
+    try {
+      response = await getDogBreeds()
+    } catch (err) {
+      response = err
+    }
+    expect(response instanceof Error).toBe(true)
+    expect(response.name).toBe('RequestTimeOut')
+    expect(response.message).toBe('Request to externial API timed out')
   })
 })
