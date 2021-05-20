@@ -19,7 +19,7 @@ export interface SuccessResponse<T> extends Response {
 
 export interface RequestedAPIData<T> {
   status: Status
-  message: T | string
+  message: T
 }
 
 export type DogBreedSubGroups = {
