@@ -6,7 +6,7 @@ import { Status } from './types'
 
 jest
   .spyOn(req, 'getDogBreeds')
-  .mockImplementation((): any => ({ status: Status.success, data: input1 }))
+  .mockImplementation((): any => ({ status: Status.success, message: input1 }))
 
 describe('test successful API call', () => {
   it('should return 200 for a successful call', async () => {
@@ -22,21 +22,23 @@ describe('test successful API call', () => {
 })
 
 describe('test errors', () => {
-  it('should throw an error if the API result sets the status to error', async () => {
+  it('should throw an error if the API returns an error', async () => {
     jest
       .spyOn(req, 'getDogBreeds')
-      .mockImplementation((): any => ({ status: Status.error, data: 'Error from API' }))
+      .mockImplementation((): any => Promise.reject(new Error('Something went wrong')))
     const response: any = await getBreeds()
     expect(response.statusCode).toBe(500)
     expect(response.message).toEqual('Something went wrong')
   })
 
-  it('should forwared Error if the API fails', async () => {
+  it('should forwared the timeout error', async () => {
     jest.spyOn(req, 'getDogBreeds').mockImplementation((): any => {
-      return Promise.reject(new Error('There was a problem with the API request'))
+      const error = new Error('Request to externial API timed out')
+      error.name = 'RequestTimeOut'
+      return Promise.reject(error)
     })
     const response: any = await getBreeds()
-    expect(response.statusCode).toBe(500)
-    expect(response.message).toEqual('There was a problem with the API request')
+    expect(response.statusCode).toBe(408)
+    expect(response.message).toEqual('Request to externial API timed out')
   })
 })
