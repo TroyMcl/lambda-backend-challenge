@@ -17,7 +17,7 @@ describe('test successful API call', () => {
   it('should have a correctly formated body array', async () => {
     const response: any = await getBreeds()
     expect(response.body.length).toEqual(assert1.length)
-    expect(response.body.join(' ')).toEqual(assert1.join(' '))
+    expect(response.body).toEqual(assert1)
   })
 })
 
@@ -34,7 +34,7 @@ describe('test errors', () => {
   it('should forwared the timeout error', async () => {
     jest.spyOn(req, 'getDogBreeds').mockImplementation((): any => {
       const error = new Error('Request to externial API timed out')
-      error.name = 'RequestTimeOut'
+      error.name = 'AbortError'
       return Promise.reject(error)
     })
     const response: any = await getBreeds()
