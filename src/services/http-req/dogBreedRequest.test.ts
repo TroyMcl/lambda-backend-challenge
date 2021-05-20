@@ -23,49 +23,30 @@ describe('fetching api data for dog breeds', () => {
   })
 })
 
-describe('handling errors from the external call', () => {
+describe('it handles errors correctly', () => {
+  const generalError = new Error('Something went bananas')
+  generalError.name = 'GeneralError'
   beforeEach(() => {
     mockedFetch.mockReturnValueOnce({
-      json: () => {
-        throw new Error('I broke somewhere')
-      },
+      json: () => Promise.reject(generalError),
     })
   })
 
-  it('should bubble up an error from the external API call', async () => {
-    let response
-    try {
-      response = await getDogBreeds()
-    } catch (err) {
-      response = err
-    }
-    expect(response instanceof Error).toBe(true)
-    expect(response.message).toEqual('I broke somewhere')
+  it('should throw an error if API call throws an error', () => {
+    return expect(getDogBreeds()).rejects.toEqual(generalError)
   })
 })
 
-describe('it handles the external API timing out', () => {
+describe('it handles the external API timing out ', () => {
+  const abortError = new Error('Request to externial API timed out')
+  abortError.name = 'AbortError'
   beforeEach(() => {
     mockedFetch.mockReturnValueOnce({
-      json: () => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({ this: 'should not matter' })
-          }, 3000)
-        })
-      },
+      json: () => Promise.reject(abortError),
     })
   })
 
-  it('should return the correct status and message for a timed out API call', async () => {
-    let response
-    try {
-      response = await getDogBreeds()
-    } catch (err) {
-      response = err
-    }
-    expect(response instanceof Error).toBe(true)
-    expect(response.name).toBe('RequestTimeOut')
-    expect(response.message).toBe('Request to externial API timed out')
+  it('should throw an AbortError if the AbortController throws an AbortError', () => {
+    return expect(getDogBreeds()).rejects.toEqual(abortError)
   })
 })
